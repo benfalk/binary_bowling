@@ -95,7 +95,7 @@ defmodule BinaryBowling.Game do
         <<s::16, 2::2, frame::6, prior::binary, roll1::4, 10::4, rem::binary, n::binary>>
 
       {9, 1, _} ->
-        if amount + roll1 == 10 do
+        if amount + roll1 >= 10 do
           <<s::16, 2::2, frame::6, prior::binary, roll1::4, amount::4, rem::binary, n::binary>>
         else
           game_over(
@@ -124,21 +124,44 @@ defmodule BinaryBowling.Game do
       frame_list(frames)
       |> Enum.chunk_every(3, 1, [])
       |> Enum.reduce(0, fn
+        [{10, 0}, {10, 0}, {a, _, _}], sum ->
+          sum + 20 + a
+
         [{10, 0}, {10, 0}, {a, _}], sum ->
           sum + 20 + a
 
-        [{10, 0}, {a, b}, {_, _}], sum ->
+        [{10, 0}, {a, b}, _], sum ->
           sum + 10 + a + b
 
         [{a, b}, {c, _}, _], sum when a + b == 10 ->
           sum + 10 + c
 
-        [{a, b}, _, _], sum ->
+        [{a, b}, {_, _}, _], sum ->
           sum + a + b
 
-        _unknown, sum ->
-          # IO.inspect(unknown)
-          sum
+        [{10, 0}, {10, a, b}], sum ->
+          sum + 30 + a + a + b
+
+        [{a, b}, {10, c, d}], sum when a + b == 10 ->
+          sum + 30 + c + d
+
+        [{a, b}, {c, d, e}], sum when a + b == 10 and c + d == 10 ->
+          sum + 20 + c + e
+
+        [{a, b}, {10, c, d}], sum ->
+          sum + a + b + 10 + c + d
+
+        [{a, b}, {c, d, _}], sum when a + b == 10 ->
+          sum + 10 + c + c + d
+
+        [{a, b}, {c, d, e}], sum when c + d == 10 ->
+          sum + a + b + c + d + e
+
+        [{a, b}, {c, d, _}], sum ->
+          sum + a + b + c + d
+
+        state, sum ->
+          raise "unknown frame state: #{inspect(state)} with current sum: #{sum}"
       end)
 
     <<over::1, score::15, postion::8, frames::binary, n::binary>>
