@@ -67,9 +67,7 @@ defmodule BinaryBowling.GameTest do
     test "The Big Choke" do
       game =
         Game.new("ben")
-        |> do_rolls(for _ <- 1..9, do: 0)
-        |> Game.roll(0)
-        |> Game.roll(0)
+        |> do_rolls(for _ <- 1..18, do: 0)
         |> Game.roll(7)
         |> Game.roll(3)
         |> Game.roll(5)
