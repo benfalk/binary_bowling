@@ -55,6 +55,9 @@ defmodule BinaryBowling.Game do
     @blank_board <> playername
   end
 
+  @spec playername(Game.t()) :: String.t()
+  def playername(<<_::bytes-size(14), name::binary>>), do: name
+
   @spec score(Game.t()) :: non_neg_integer()
   def score(<<_::1, score::15, _::binary>>), do: score
 
